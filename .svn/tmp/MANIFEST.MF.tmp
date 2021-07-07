@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+<<<<<<< .mine
+Built-By: junee
+=======
+Built-By: lime_june
+>>>>>>> .r26
+Build-Jdk: 1.8.0_271
+Created-By: Maven Integration for Eclipse
+

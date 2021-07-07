@@ -1,0 +1,48 @@
+package com.lime.common.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lime.user.vo.UserVO;
+
+import egovframework.rte.fdl.cmmn.exception.EgovBizException;
+import egovframework.rte.psl.dataaccess.EgovAbstractMapper;
+import egovframework.rte.psl.dataaccess.util.EgovMap;
+
+@Repository("commonDAO")
+public class CommonDAO extends EgovAbstractMapper{
+	@Autowired
+	private EgovAbstractMapper egovabstractMapper;
+	
+	@Autowired
+	private SqlSessionTemplate sqlSessionTemplate;
+
+	/*콤보박스 insert*/
+	public List<EgovMap> selectCombo(Map<String, Object> inOutMap) throws EgovBizException{
+		return selectList("Common.selectCombo", inOutMap);
+	}
+
+	public void insert(Map<String, Object> inOutMap) {
+		egovabstractMapper.insert("Common.insertBoard",inOutMap);
+	}
+	// 아이디 중복 검사
+		public int check_id(String id) throws Exception{
+			return sqlSessionTemplate.selectOne("Common.check_id", id);
+		}
+		
+		// 이메일 중복 검사
+		public int check_email(String email) throws Exception{
+			return sqlSessionTemplate.selectOne("Common.check_email", email);
+		}
+		
+		// 회원가입
+		@Transactional
+		public int insertBoard(UserVO user) throws Exception{
+			return sqlSessionTemplate.insert("Common.insertBoard", user);
+		}
+}

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "Common">
+
+	<!-- 	코드 테이블 에서 셀렉트 박스 리스트 검색 -->
+	<select id="selectCombo" parameterType="map" resultType="egovMap">
+		SELECT
+		  CODE,
+		  COM_KOR
+		FROM CODE_MASTER
+		WHERE
+			CATEGORY = #{category}
+		AND
+			USE_YN     ='Y'
+	</select>
+	<select id="selectList" parameterType="map" resultType="egovMap">
+		SELECT
+			AAA.*
+		FROM(
+			SELECT
+				COUNT(*) OVER() AS TOTAL_COUNT
+				, AA.*
+			FROM(
+				SELECT
+			  		ROW_NUMBER() OVER(ORDER BY ACCOUNT_SEQ)RNUM
+			  		,ACCOUNT_SEQ
+	         		,T1.COM_KOR as PROFIT_COST
+	        		,T2.COM_KOR as BIG_GROUP
+	        		,T3.COM_KOR as MIDDLE_GROUP
+	        		,T4.COM_KOR as SMALL_GROUP
+	        		,T5.COM_KOR as DETAIL_GROUP
+	        		,COMMENTS
+	        		,TRANSACTION_MONEY
+	        		,TRANSACTION_DATE
+	        		,WRITER
+	        		,TO_CHAR(REG_DATE, 'YYYY-MM-DD' )
+   				FROM
+	   				ACCOUNT_TB AT
+	   				INNER JOIN CODE_MASTER T1 ON (T1.CATEGORY ='A000000' AND T1.CODE = AT.PROFIT_COST)
+	   				INNER JOIN CODE_MASTER T2 ON (T2.CATEGORY = AT.PROFIT_COST AND T2.CODE = AT.BIG_GROUP)
+	   				INNER JOIN CODE_MASTER T3 ON (T3.CATEGORY = AT.BIG_GROUP AND T3.CODE = AT.MIDDLE_GROUP)
+	   				INNER JOIN CODE_MASTER T4 ON (T4.CATEGORY = AT.MIDDLE_GROUP AND T4.CODE = AT.SMALL_GROUP)
+	   				INNER JOIN CODE_MASTER T5 ON (T5.CATEGORY = AT.SMALL_GROUP AND T5.CODE = AT.DETAIL_GROUP)
+   				) AA
+			) AAA
+		WHERE
+			AAA.RNUM BETWEEN #{START} AND #{END}
+	</select>
+
+<<<<<<< .mine
+
+
+=======
+
+>>>>>>> .r36
+	<select id="selectOneAccountBySeq" parameterType="map" resultType="egovMap">
+		SELECT
+			ACCOUNT_SEQ,
+			PROFIT_COST,
+			BIG_GROUP,
+			MIDDLE_GROUP,
+			SMALL_GROUP,
+			DETAIL_GROUP,
+			COMMENTS,
+			TRANSACTION_MONEY,
+			TRANSACTION_DATE,
+			WRITER,
+			REG_DATE
+			FROM ACCOUNT_TB
+			WHERE
+				ACCOUNT_SEQ =#{account_seq, jdbcType=INTEGER}
+	</select>
+
+	<insert id="insertBoard" parameterType="Hashmap">
+		INSERT INTO
+			ACCOUNT_TB(
+			ACCOUNT_SEQ,
+			PROFIT_COST,
+			BIG_GROUP,
+			MIDDLE_GROUP,
+			SMALL_GROUP,
+			DETAIL_GROUP,
+			COMMENTS,
+			TRANSACTION_MONEY,
+			TRANSACTION_DATE,
+			WRITER,
+			REG_DATE)
+		VALUES(
+			#{account_seq},
+			#{profitCost, jdbcType=VARCHAR},
+			#{bigGroup, jdbcType=VARCHAR},
+			#{middleGroup, jdbcType=VARCHAR},
+			#{smallGroup, jdbcType=VARCHAR},
+			#{detailGroup, jdbcType=VARCHAR},
+			#{comment, jdbcType=VARCHAR},
+			#{transactionMoney},
+			#{transactionDate},
+			'1',
+			TO_CHAR(SYSDATE, 'YYYY-MM-DD'))
+			<selectKey resultType="integer" keyProperty="account_seq" order="BEFORE">
+				SELECT ACCOUNT_SEQ.NEXTVAL FROM DUAL
+			</selectKey>
+	</insert>
+	<update id="updateBoard" parameterType="Hashmap">
+		UPDATE ACCOUNT_TB SET
+			PROFIT_COST=#{profitCost, jdbcType=VARCHAR},
+			BIG_GROUP=#{bigGroup, jdbcType=VARCHAR},
+			MIDDLE_GROUP=#{middleGroup, jdbcType=VARCHAR},
+			SMALL_GROUP=#{smallGroup, jdbcType=VARCHAR},
+			DETAIL_GROUP=#{detailGroup, jdbcType=VARCHAR},
+			COMMENTS=#{comment, jdbcType=VARCHAR},
+			TRANSACTION_MONEY=#{transactionMoney},
+			TRANSACTION_DATE=#{transactionDate}
+		WHERE ACCOUNT_SEQ=#{account_seq}
+	</update>
+	<!-- 아이디 중복 검사 -->
+	<select id="check_id" parameterType="String" resultType="int">
+		select count(*) from USER_TB where user_Id = #{memId}
+	</select>
+
+	<!-- 이메일 중복 검사 -->
+	<select id="check_pwd" parameterType="String" resultType="int">
+		select count(*) from USER_TB where pwd = #{pwd}
+	</select>
+
+	<!-- 회원 가입 -->
+	<insert id="join_user" parameterType="UserVO">
+		insert into USER_TB values(USER_SEQ.NEXTVAL,#{user_Id}, #{pwd}, #{memName},SYSDATE)
+	</insert>
+
+</mapper>
